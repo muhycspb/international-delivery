@@ -1,4 +1,11 @@
-from fastapi import APIRouter
+
+from fastapi import APIRouter, Depends, Response, Cookie
+from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
+
+from src.database.database import get_async_session
+from src.database.models import Parcel
+from src.services.services import check_cookie
 
 router = APIRouter(
     prefix="/list_of_my_parcels",
@@ -7,11 +14,35 @@ router = APIRouter(
 )
 
 
-@router.get("/")
-async def read_root():
-    return 'list_of_my_parcels'
+async def get_list_of_my_parcels(session_id, session):
+    query = select(Parcel.parcel_name,
+                   Parcel.parcel_weight,
+                   Parcel.parcel_type,
+                   Parcel.parcel_cost,
+                   Parcel.parcel_cost_delivery,
+                   ).where(Parcel.parcel_session_id == session_id)
 
-#
-# @router.post("/")
-# async def register_a_parcel(data: Parcel, session=Depends(get_async_session)):
-#     return data
+    my_parcels = []
+    try:
+        result = await session.execute(query)
+        result = list(result.all())
+        for parcel in result:
+            parcel = list(parcel)
+            if parcel[4] is None:
+                parcel[4] = "Не рассчитано"
+            my_parcels.append(dict(zip(("название", "вес", "тип посылки", "стоимость", "стоимость доставки"), parcel)))
+    except NoResultFound:
+        return "Посылок нет"
+    return my_parcels
+
+
+@router.get("/")
+async def list_of_my_parcels(response: Response,
+                             session_id=Cookie(None),
+                             session=Depends(get_async_session)):
+    session_id = await check_cookie(response=response,
+                                    session_id=session_id,
+                                    session=session)
+    result = await get_list_of_my_parcels(session_id=session_id,
+                                          session=session)
+    return result
