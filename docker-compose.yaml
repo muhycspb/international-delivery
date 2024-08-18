@@ -32,17 +32,17 @@ services:
             interval: 10s
             timeout: 5s
             retries: 5
-#    redis:
-#        container_name: redis_container
-#        image: redis
-#        restart: unless-stopped
-#        ports:
-#            - "6379:6379"
-#        healthcheck:
-#            test: ["CMD-SHELL", "redis-cli ping"]
-#            interval: 10s
-#            timeout: 5s
-#            retries: 5
+    redis:
+        container_name: redis_container
+        image: redis
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        healthcheck:
+            test: ["CMD-SHELL", "redis-cli ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 #    rabbitmq:
 #        container_name: rabbitmq_container
 #        image: rabbitmq:management-alpine

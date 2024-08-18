@@ -1,4 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy import select
+
+from src.database.database import get_async_session
+from src.database.models import ParcelType
 
 router = APIRouter(
     prefix="/all_types",
@@ -8,10 +12,8 @@ router = APIRouter(
 
 
 @router.get("/")
-async def read_root():
-    return 'all_types'
-#
-#
-# @router.post("/")
-# async def register_a_parcel(data: Parcel, session=Depends(get_async_session)):
-#     return data
+async def all_types(session=Depends(get_async_session)):
+    query = select(ParcelType.id, ParcelType.type_name, )
+    result = await session.execute(query)
+    result = dict(result.all())
+    return result
