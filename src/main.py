@@ -1,8 +1,9 @@
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from src.database.database import connect_to_redis, create_table
 from src.routers.routers import all_routers
+
+from contextlib import asynccontextmanager
 
 
 @asynccontextmanager
@@ -10,7 +11,7 @@ async def lifespan(_: FastAPI):
     """Выполняется при запуске и закрытии приложения"""
     print("Приложение запущено")
     connect_to_redis()
-    await create_table()
+    # await create_table()
     yield
     print("Закрытие приложения")
 

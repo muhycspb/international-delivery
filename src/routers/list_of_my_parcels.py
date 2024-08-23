@@ -13,13 +13,13 @@ router = APIRouter(
 )
 
 
-async def get_list_of_my_parcels(session_id, session):
+async def get_list_of_my_parcels(session_id, session, page: int = 1, page_size: int = 10):
     query = select(Parcel.parcel_name,
                    Parcel.parcel_weight,
                    Parcel.parcel_type,
                    Parcel.parcel_cost,
                    Parcel.parcel_cost_delivery,
-                   ).where(Parcel.parcel_session_id == session_id)
+                   ).where(Parcel.parcel_session_id == session_id).offset((page - 1) * page_size).limit(page_size)
 
     my_parcels = []
     try:
@@ -38,10 +38,11 @@ async def get_list_of_my_parcels(session_id, session):
 @router.get("/")
 async def list_of_my_parcels(response: Response,
                              session_id=Cookie(None),
-                             session=Depends(get_async_session)):
+                             session=Depends(get_async_session), page: int = 1):
     session_id = await check_cookie(response=response,
                                     session_id=session_id,
                                     session=session)
     result = await get_list_of_my_parcels(session_id=session_id,
-                                          session=session)
+                                          session=session,
+                                          page=page)
     return result
