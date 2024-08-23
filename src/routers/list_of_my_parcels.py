@@ -1,5 +1,4 @@
-
-from fastapi import APIRouter, Depends, Response, Cookie
+from fastapi import APIRouter, Cookie, Depends, Response
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 

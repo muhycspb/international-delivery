@@ -13,6 +13,7 @@ class Settings:
     postgres_username = _settings.postgres.user
     postgres_password = _settings.postgres.password
 
+    postgres_container_name = _settings.postgres.container_name
     redis_container_name = _settings.redis.container_name
 
 

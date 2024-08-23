@@ -1,16 +1,13 @@
-import uuid
-import requests
 import json
+import requests
+import uuid
+
 from datetime import datetime
 from fastapi import Response
-
 from fastapi_cache.decorator import cache
-
 from hashlib import sha256
-from sqlalchemy import inspect
 
-from src.database.database import Base, engine, async_session_maker
-from src.database.models import Session, ParcelType
+from src.database.models import Session
 
 
 @cache(expire=60)
@@ -19,25 +16,6 @@ async def get_current_course_usd() -> float:
     response = requests.get("https://www.cbr-xml-daily.ru/daily_json.js")
     data = json.loads(response.text)
     return data["Valute"]["USD"]["Value"]
-
-
-async def create_table() -> None:
-    """Создание таблиц в БД"""
-    async with engine.begin() as conn:
-        tables = await conn.run_sync(
-            lambda sync_conn: inspect(sync_conn).get_table_names()
-        )
-        if not tables:
-            await conn.run_sync(Base.metadata.create_all)
-
-
-async def insert_types():
-    """Добавление типов посылок в БД"""
-    async with async_session_maker() as session:
-        for type_name in ("одежда", "электроника", "разное"):
-            type_name = ParcelType(type_name=type_name)
-            session.add(type_name)
-        await session.commit()
 
 
 async def insert_session_id(session_id: str, session) -> None:
@@ -66,9 +44,9 @@ async def set_cookie(response: Response):
     return session_id
 
 
-async def check_cookie(response: Response, session_id: str, session) -> str:
+async def check_cookie(response: Response, session_id, session):
     """Проверка наличия cookie с идентификатором сессии, если нет - создание нового и запись в БД"""
     if not session_id:
-        session_id = await set_cookie(response)
-        await insert_session_id(session_id, session)
+        session_id = await set_cookie(response=response)
+        await insert_session_id(session_id=session_id, session=session)
     return session_id

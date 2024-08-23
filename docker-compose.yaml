@@ -1,19 +1,19 @@
 services:
-#    app:
-#        container_name: app_container
-#        build:
-#            context: .
-#        restart: unless-stopped
-#        ports:
-#            - "8000:8000"
+    app:
+        container_name: app_container
+        build:
+            context: .
+        restart: unless-stopped
+        ports:
+            - "8000:8000"
 #        healthcheck:
 #            test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
 #            interval: 10s
 #            timeout: 5s
 #            retries: 5
-#        depends_on:
-#            - postgres
-#            - redis
+        depends_on:
+            - postgres
+            - redis
     postgres:
         container_name: postgres_container
         image: postgres
@@ -47,6 +47,8 @@ services:
 #        container_name: rabbitmq_container
 #        image: rabbitmq:management-alpine
 #        restart: unless-stopped
+#        volumes:
+#            - ./data:/var/lib/rabbitmq
 #        ports:
 #          - "15672:15672"
 #          - "5672:5672"
