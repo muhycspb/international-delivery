@@ -4,25 +4,19 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
 
+from src.database.models import ParcelType, Base
 
 engine = create_async_engine(f"postgresql+asyncpg://{s.postgres_username}:{s.postgres_password}@"
                              f"{s.postgres_container_name}/{s.postgres_database}", echo=False)
-# engine = create_async_engine(f"postgresql+asyncpg://{s.postgres_username}:{s.postgres_password}@"
-#                              f"{s.postgres_host}:{s.postgres_port}/{s.postgres_database}", echo=False)
 
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 
-def connect_to_redis():
+async def connect_to_redis():
     """Подключаемся к Redis"""
     redis = aioredis.from_url(f"redis://{s.redis_container_name}")
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-
-
-class Base(DeclarativeBase):
-    pass
 
 
 async def get_async_session():
@@ -38,3 +32,12 @@ async def create_table() -> None:
         )
         if not tables:
             await conn.run_sync(Base.metadata.create_all)
+
+
+async def insert_types():
+    """Добавление типов посылок в БД"""
+    async with async_session_maker() as session:
+        for type_name in ("одежда", "электроника", "разное"):
+            type_name = ParcelType(type_name=type_name)
+            session.add(type_name)
+        await session.commit()

@@ -6,9 +6,6 @@ from src.routers.calculate_the_delivery import calculate
 
 
 rabbitmq_broker = Celery(broker="amqp://user:password@rabbitmq_container:5672/parcels")
-# rabbitmq_broker.conf.task_routes = {
-#     "insert_parcel": {"queue": "insert_parcel_queue"}
-# }
 
 
 @rabbitmq_broker.task

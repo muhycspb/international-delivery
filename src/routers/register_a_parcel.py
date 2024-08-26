@@ -1,29 +1,15 @@
 from fastapi import APIRouter, Cookie, Depends, Response
 
 from src.database.database import get_async_session
-from src.database.models import Parcel
 from src.schemas.schemas import SParcel
 from src.services.services import check_cookie, generate_parcel_id
+from src.worker.insert_parcel_celery import insert_parcel
 
 router = APIRouter(
     prefix="/register_a_parcel",
     tags=["register_a_parcel"],
     responses={404: {"description": "Not found"}},
 )
-
-
-async def insert_parcel(data, parcel_id, session_id, session):
-    """Добавление посылки в БД"""
-    parcel = Parcel(
-        parcel_name=data.parcel_name,
-        parcel_weight=data.parcel_weight,
-        parcel_type=data.parcel_type,
-        parcel_cost=data.parcel_cost,
-        parcel_id=parcel_id,
-        parcel_session_id=session_id,
-    )
-    session.add(parcel)
-    await session.commit()
 
 
 @router.post("/")
@@ -35,8 +21,7 @@ async def register_a_parcel(data: SParcel,
     session_id = await check_cookie(response=response,
                                     session_id=session_id,
                                     session=session)
-    await insert_parcel(data=data,
+    await insert_parcel(data.__dict__,
                         parcel_id=parcel_id,
-                        session_id=session_id,
-                        session=session)
+                        session_id=session_id)
     return parcel_id

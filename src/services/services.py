@@ -13,9 +13,13 @@ from src.database.models import Session
 @cache(expire=60)
 async def get_current_course_usd() -> float:
     """Получение текущего курса доллара в рублях"""
-    response = requests.get("https://www.cbr-xml-daily.ru/daily_json.js")
-    data = json.loads(response.text)
-    return data["Valute"]["USD"]["Value"]
+    try:
+        response = requests.get("https://www.cbr-xml-daily.ru/daily_json.js")
+        data = json.loads(response.text)
+        course = data["Valute"]["USD"]["Value"]
+    except Exception:
+        course = None
+    return course
 
 
 async def insert_session_id(session_id: str, session) -> None:
