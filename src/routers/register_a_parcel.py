@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Cookie, Depends, Response
+# from loguru import logger
 
 from src.database.database import get_async_session
+from src.loguru.loguru_logger import logg
 from src.schemas.schemas import SParcel
 from src.services.services import check_cookie, generate_parcel_id
 from src.worker.insert_parcel_celery import insert_parcel
@@ -24,4 +26,5 @@ async def register_a_parcel(data: SParcel,
     await insert_parcel(data.__dict__,
                         parcel_id=parcel_id,
                         session_id=session_id)
+    logg.debug(f"Добавлена посылка с идентификатором: {parcel_id}")
     return parcel_id

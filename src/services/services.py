@@ -11,7 +11,7 @@ from src.database.models import Session
 
 
 @cache(expire=60)
-async def get_current_course_usd() -> float:
+async def get_current_course_usd() -> float | None:
     """Получение текущего курса доллара в рублях"""
     try:
         response = requests.get("https://www.cbr-xml-daily.ru/daily_json.js")
@@ -49,7 +49,7 @@ async def set_cookie(response: Response):
 
 
 async def check_cookie(response: Response, session_id, session):
-    """Проверка наличия cookie с идентификатором сессии, если нет - создание нового и запись в БД"""
+    """Проверка наличия cookie с идентификатором сессии"""
     if not session_id:
         session_id = await set_cookie(response=response)
         await insert_session_id(session_id=session_id, session=session)
